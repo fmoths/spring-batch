@@ -24,6 +24,7 @@ public class SimpleJobConfiguration {
         //simpleJob 이라는 배치 생성
         return jobBuilderFactory.get("simpleJob")
                 .start(simpleStep1(null))
+                .next(simpleStep2(null))
                 .build();
     }
 
@@ -35,6 +36,20 @@ public class SimpleJobConfiguration {
                 //step 안에서 수행될 step을 커스텀한다.
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>> This is Step1");
+                    log.info(">>>>> requestDate = {}", requestDate);
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step simpleStep2 (@Value("#{JobParameters[requestDate]}") String requestDate){
+        //simpleStep1 이라는 배치의 스텝 생성
+        return stepBuilderFactory.get("simpleStep2")
+                //step 안에서 수행될 step을 커스텀한다.
+                .tasklet((contribution, chunkContext) -> {
+                    log.info(">>>>> This is Step2");
                     log.info(">>>>> requestDate = {}", requestDate);
                     return RepeatStatus.FINISHED;
                 })
