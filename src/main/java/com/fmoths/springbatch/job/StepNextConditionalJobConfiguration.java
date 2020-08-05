@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.listener.StepExecutionListenerSupport;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,5 +68,20 @@ public class StepNextConditionalJobConfiguration {
                     return RepeatStatus.FINISHED;
                 })
                 .build();
+    }
+
+    //ExitCode custom을 위한 코드
+    public class SkipCheckingListener extends StepExecutionListenerSupport {
+
+        public ExitStatus afterStep(StepExecution stepExecution) {
+            String exitCode = stepExecution.getExitStatus().getExitCode();
+            if (!exitCode.equals(ExitStatus.FAILED.getExitCode()) &&
+                    stepExecution.getSkipCount() > 0) {
+                return new ExitStatus("COMPLETED WITH SKIPS");
+            }
+            else {
+                return null;
+            }
+        }
     }
 }
