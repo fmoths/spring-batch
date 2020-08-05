@@ -20,6 +20,7 @@ import java.util.Random;
 @Configuration
 @RequiredArgsConstructor
 public class DeciderJobConfiguration {
+
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
@@ -27,13 +28,13 @@ public class DeciderJobConfiguration {
     public Job deciderJob(){
         return jobBuilderFactory.get("deciderJob")
                 .start(startStep())
-                .next(decider())
-                .from(decider())
-                    .on("ODD")
-                    .to(oddStep())
-                .from(decider())
-                    .on("EVEN")
-                    .to(evenStep())
+                .next(decider())// 홀수 짝수 구분
+                .from(decider()) // decider 상태가
+                    .on("ODD") // 홀수 라면
+                    .to(oddStep()) //oddstep으로
+                .from(decider())// decider 상태가
+                    .on("EVEN") // 짝수라면
+                    .to(evenStep()) // evenStep으로
                 .end()
                 .build();
     }
@@ -50,7 +51,7 @@ public class DeciderJobConfiguration {
 
     @Bean
     public Step oddStep(){
-        return stepBuilderFactory.get("startStep")
+        return stepBuilderFactory.get("oddStep")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>> 홀수입니다.");
                     return RepeatStatus.FINISHED;
@@ -60,7 +61,7 @@ public class DeciderJobConfiguration {
 
     @Bean
     public Step evenStep(){
-        return stepBuilderFactory.get("startStep")
+        return stepBuilderFactory.get("evenStep")
                 .tasklet((contribution, chunkContext) -> {
                     log.info(">>>>> 짝수입니다.");
                     return RepeatStatus.FINISHED;
